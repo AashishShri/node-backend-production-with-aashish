@@ -1,1 +1,1 @@
-console.log("This is husky test script");
+console.log("I m from husky test")
