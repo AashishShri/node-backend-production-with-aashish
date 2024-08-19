@@ -17,7 +17,8 @@ ie:  npm i typescript -D
 ie:  npm i @commitlint/cli
  @commitlint/config-conventional -D
  
-8. ES Lint
+8. ES Lint : Find and fix problems in your JavaScript code
+ie: npx eslint .
 9. Prettier
 10. Project Environment
 11. Express JS
