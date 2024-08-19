@@ -13,7 +13,10 @@ ie:  npm i typescript -D
      npx tsc --init (To automatic genrate tsconfig.json)
 
 6. Folder Structure :  Will be follow as a MVC pattern
-7. Commit Lint
+7. Commit Lint : Using for git hook , to define proper sturcture for git commit to handle for commit , with the help for husky
+ie:  npm i @commitlint/cli
+ @commitlint/config-conventional -D
+ 
 8. ES Lint
 9. Prettier
 10. Project Environment
