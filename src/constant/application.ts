@@ -1,0 +1,1 @@
+// Its use for constant value for application
