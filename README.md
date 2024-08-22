@@ -24,8 +24,10 @@ ie: npx eslint .
 11. Express JS
 12. Global Error handling
 13. 404 Hnadler
-14. Logger
-15. Source Map
+14. Logger : winston is designed to be a simple and universal logging library with support for multiple transports. A transport is essentially a storage device for your logs.
+
+15. Source Map :  This module provides source map support for stack traces in node via the V8 stack trace API. It uses the source-map module to replace the paths and line numbers of source-mapped files with their original paths and line numbers.
+
 16. ColorFul terminal
 17. MongoDb
 18. DataBase Log Storage

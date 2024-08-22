@@ -4,9 +4,10 @@ import { ConsoleTransportInstance, FileTransportInstance } from 'winston/lib/win
 import config from '../config/config'
 import { EApplicationEnvironment } from '../constant/application'
 import path from 'path'
+import * as sourceMapSupport from 'source-map-support'
 
 
-
+sourceMapSupport.install()
 
 
 
