@@ -28,7 +28,7 @@ ie: npx eslint .
 
 15. Source Map :  This module provides source map support for stack traces in node via the V8 stack trace API. It uses the source-map module to replace the paths and line numbers of source-mapped files with their original paths and line numbers.
 
-16. ColorFul terminal
+16. ColorFul terminal : Easily set your terminal text color & styles
 17. MongoDb
 18. DataBase Log Storage
 19. DataBase migration
