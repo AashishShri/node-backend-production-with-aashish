@@ -31,7 +31,13 @@ ie: npx eslint .
 16. ColorFul terminal : Easily set your terminal text color & styles
 17. MongoDb
 18. DataBase Log Storage
-19. DataBase migration
+19. DataBase migration :  ts-migrate-mongoose is a migration framework for projects that are already using mongoose
+ie:  npm run migrate:dev create first_name_last_name_to_name
+     npm run migrate:dev up first_name_last_name_to_name
+     npm run migrate:dev down first_name_last_name_to_name
+     npm run migrate:dev list first_name_last_name_to_name
+     npm run migrate:dev prune
+
 20. Health Endpoint
 21. Security - Helmet JS
 22. Security - CORS
