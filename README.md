@@ -53,4 +53,8 @@ ncu
 ncu -u 
 npm i
 
-25. Docker
+25. Docker : 
+>Development
+docker build -t backend-app-with-aashish:dev -f docker/development/Dockerfile
+docker run --rm -it -v ${PWD}:/usr/srcbackend-app-with-aashish -v /usr/srcbackend-app-with-aashish/node_modules -p 3000:3000 backend-app-with-aashish:dev
+
