@@ -47,5 +47,10 @@ brower by default disAllow cross origin access
 
 23. Security - rate limiting : rate-limiter-flexible counts and limits the number of actions by key and protects from DDoS and brute force attacks at any scale.
 
-24. Dependecy Updates
+24. Dependecy Updates : npm-check-updates upgrades your package.json dependencies to the latest versions, ignoring specified versions
+ie: npm i npm-check-updates -g
+ncu
+ncu -u 
+npm i
+
 25. Docker
