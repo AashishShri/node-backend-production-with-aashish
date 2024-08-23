@@ -42,7 +42,9 @@ ie:  npm run migrate:dev create first_name_last_name_to_name
 21. Security - Helmet JS : Helmet helps secure Express apps by setting HTTP response headers.
 ie: X-Powered-By: Info about the web server. Removed because it could be used in simple attacks
 
-22. Security - CORS
+22. Security - CORS : CORS is a node.js package for providing a Connect/Express middleware that can be used to enable CORS with various options
+brower by default disAllow cross origin access
+
 23. Security - rate limiting
 24. Dependecy Updates
 25. Docker
