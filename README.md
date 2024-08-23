@@ -45,6 +45,7 @@ ie: X-Powered-By: Info about the web server. Removed because it could be used in
 22. Security - CORS : CORS is a node.js package for providing a Connect/Express middleware that can be used to enable CORS with various options
 brower by default disAllow cross origin access
 
-23. Security - rate limiting
+23. Security - rate limiting : rate-limiter-flexible counts and limits the number of actions by key and protects from DDoS and brute force attacks at any scale.
+
 24. Dependecy Updates
 25. Docker
