@@ -58,3 +58,17 @@ npm i
 docker build -t backend-app-with-aashish:dev -f docker/development/Dockerfile
 docker run --rm -it -v ${PWD}:/usr/srcbackend-app-with-aashish -v /usr/srcbackend-app-with-aashish/node_modules -p 3000:3000 backend-app-with-aashish:dev
 
+
+26.  season 2.0 Complete authentication system with base template project 
+steps: 
+1> git clone
+ie : git clone https://github.com/AashishShri/node-backend-production-with-aashish.git <authentication-system>
+
+2> Need to add/update env to run template project 
+
+
+3> Delete old .git and Need to add git (using git init)
+
+4> Install dependecny 
+ie:  npm i
+
