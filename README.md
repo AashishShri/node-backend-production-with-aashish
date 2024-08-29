@@ -59,16 +59,18 @@ docker build -t backend-app-with-aashish:dev -f docker/development/Dockerfile
 docker run --rm -it -v ${PWD}:/usr/srcbackend-app-with-aashish -v /usr/srcbackend-app-with-aashish/node_modules -p 3000:3000 backend-app-with-aashish:dev
 
 
-26.  season 2.0 Complete authentication system with base template project 
-steps: 
-1> git clone
-ie : git clone https://github.com/AashishShri/node-backend-production-with-aashish.git <authentication-system>
+26. Season 2.0 Complete authentication system with base template project 
+1>  npm i jsonwebtoken bcrypt libphonenumber-js joi
+2>  npm i @types/jsonwebtoken @types/bcrypt -D 
 
-2> Need to add/update env to run template project 
+// JSON Web Tokens
+JSON Web Tokens are an open, industry standard RFC 7519 method for representing claims securely between two parties.
 
+JWT.IO allows you to decode, verify and generate JWT
 
-3> Delete old .git and Need to add git (using git init)
+node.bcrypt.js : A library to help you hash passwords
 
-4> Install dependecny 
-ie:  npm i
+libphonenumber-js :A simpler and smaller rewrite of Google Android's libphonenumber library in javascript
+
+joi :The most powerful schema description language and data validator for JavaScript.
 
