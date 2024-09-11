@@ -8,4 +8,8 @@ const router = Router()
 router.route('/self').get(rateLimit, apiController.self)
 router.route('/health').get(apiController.health)
 
+//Router for authentications system
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+router.route('/register').post(apiController.register)
+
 export default router
