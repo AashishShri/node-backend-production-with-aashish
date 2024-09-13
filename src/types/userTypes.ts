@@ -25,6 +25,9 @@ export interface IUser {
     lastLoginAt: Date | null
     consent: boolean
 }
+export interface IRefreshToken {
+    token: string
+}
 
 export interface IRegisterUserRequestBody {
     name: string
@@ -32,4 +35,9 @@ export interface IRegisterUserRequestBody {
     phoneNumber: string
     password: string
     consent: boolean
+}
+
+export interface ILoginUserRequestBody {
+    emailAddress: string
+    password: string
 }

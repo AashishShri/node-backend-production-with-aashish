@@ -15,4 +15,7 @@ router.route('/register').post(apiController.register)
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.route('/confirmation/:token').put(apiController.confirmation)
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+router.route('/login').post(apiController.login)
+
 export default router

@@ -3,8 +3,8 @@ import httpResponse from '../util/httpResponse'
 import responseMessage from '../constant/responseMessage'
 import httpError from '../util/httpError'
 import quicker from '../util/quicker'
-import { IRegisterUserRequestBody, IUser } from '../types/userTypes'
-import { ValidateRegisterBody, validateJoiSchema } from '../service/validationService'
+import { ILoginUserRequestBody, IRefreshToken, IRegisterUserRequestBody, IUser } from '../types/userTypes'
+import { ValidateLoginBody, ValidateRegisterBody, validateJoiSchema } from '../service/validationService'
 import databaseService from '../service/databaseService'
 import { EUserRole } from '../constant/userConstant'
 import config from '../config/config'
@@ -12,11 +12,16 @@ import emailService from '../service/emailService'
 import logger from '../util/logger'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
+import { EApplicationEnvironment } from '../constant/application'
 
 dayjs.extend(utc)
 
 interface IRegisterUserRequest extends Request {
     body: IRegisterUserRequestBody
+}
+
+interface ILoginUserRequest extends Request {
+    body: ILoginUserRequestBody
 }
 interface IConfirmRequest extends Request {
     params: {
@@ -179,5 +184,86 @@ export default {
         } catch (err) {
             httpError(next, err, req, 500)
         }
+    },
+
+    login: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { body } = req as ILoginUserRequest
+            // Todo:
+            // * Validate & parse body
+
+            const { error, value } = validateJoiSchema<ILoginUserRequestBody>(ValidateLoginBody, body)
+            if (error) {
+                return httpError(next, error, req, 422)
+            }
+            // * Find user
+            const { emailAddress, password } = value
+            const user = await databaseService.findUserByEmailAddress(emailAddress, `+password`)
+            if (!user) {
+                return httpError(next, new Error(responseMessage.NOT_FOUND('user')), req, 404)
+            }
+            // * Validate password
+            const isValidPassword = await quicker.comparePassword(password, user.password)
+            if (!isValidPassword) {
+                return httpError(next, new Error(responseMessage.INVALID_EMAIL_OR_PASSWORD), req, 400)
+            }
+            // * Access token & refress token
+            const accesstoken = quicker.generateToken(
+                {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    userId: user.id
+                },
+                config.ACCESS_TOKEN.SECRET as string,
+                config.ACCESS_TOKEN.EXPIRY
+            )
+
+            const refreshtoken = quicker.generateToken(
+                {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    userId: user.id
+                },
+                config.REFRESH_TOKEN.SECRET as string,
+                config.REFRESH_TOKEN.EXPIRY
+            )
+            // * Last login information
+            user.lastLoginAt = dayjs().utc().toDate()
+            await user.save()
+            // * Refress token store
+            const refreshTokenPayload: IRefreshToken = {
+                token: refreshtoken
+            }
+            await databaseService.createRefreshToken(refreshTokenPayload)
+            // * Cookie send
+            let DOMAIN = ''
+            try {
+                const url = new URL(config.SERVER_URL as string)
+                DOMAIN = url.hostname
+            } catch (error) {
+                throw error
+            }
+            res.cookie('accessToken', accesstoken, {
+                path: '/api/v1',
+                domain: DOMAIN,
+                sameSite: 'strict',
+                maxAge: 1000 * config.ACCESS_TOKEN.EXPIRY,
+                httpOnly: true,
+                secure: !(config.ENV === EApplicationEnvironment.DEVELOPMENT)
+            }).cookie('refreshToken', refreshtoken, {
+                path: '/api/v1',
+                domain: DOMAIN,
+                sameSite: 'strict',
+                maxAge: 1000 * config.ACCESS_TOKEN.EXPIRY,
+                httpOnly: true,
+                secure: !(config.ENV === EApplicationEnvironment.DEVELOPMENT)
+            })
+
+            httpResponse(req, res, 200, responseMessage.SUCCESS, {
+                accesstoken,
+                refreshtoken
+            })
+        } catch (err) {
+            httpError(next, err, req, 500)
+        }
     }
 }
+

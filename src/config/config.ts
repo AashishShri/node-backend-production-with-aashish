@@ -13,4 +13,16 @@ export default {
     EMAIL_SERVICE_API_KEY : process.env.EMAIL_SERVICE_API_KEY,
     //Database 
     DATABASE_URL: process.env.DATABASE_URL,
+
+    // Access TokeN
+    ACCESS_TOKEN : {
+        SECRET:process.env.ACCESS_TOKEN_SECRET,
+        EXPIRY: 3600
+    },
+
+    //Refresh TokeN
+    REFRESH_TOKEN : {
+        SECRET:process.env.REFRESH_TOKEN_SECRET,
+        EXPIRY: 3600 * 24 * 365
+    }
 }

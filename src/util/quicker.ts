@@ -5,6 +5,7 @@ import { getTimezonesForCountry } from 'countries-and-timezones'
 import bcrypt from 'bcrypt'
 import { v4 } from 'uuid'
 import { randomInt } from 'crypto'
+import  jwt  from 'jsonwebtoken'
 
 export default {
     getSystemHealth: () => {
@@ -56,6 +57,9 @@ export default {
     hashPassword: (password: string) => {
         return bcrypt.hash(password, 10)
     },
+    comparePassword: (attemptedPassword: string, encPassword: string) => {
+        return bcrypt.compare(attemptedPassword, encPassword)
+    },
    
      
     generateRandomId: () => v4(),
@@ -64,5 +68,13 @@ export default {
         const max = Math.pow(10, length) - 1
 
         return randomInt(min, max + 1).toString()
+    },
+
+    generateToken: (payload:object, secret:string, expiry:number) => {
+        return jwt.sign(payload,secret,{
+            expiresIn: expiry
+        })
+
+        
     }
 }
