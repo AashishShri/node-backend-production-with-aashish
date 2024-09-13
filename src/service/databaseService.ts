@@ -30,5 +30,8 @@ export default {
     createRefreshToken: (payload: IRefreshToken) => {
         return refreshTokenModel.create(payload)
     },
+    findUserById: (id: string,) => {
+        return userModel.findById(id)
+    },
 
 }
