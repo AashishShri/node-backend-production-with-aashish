@@ -3,7 +3,7 @@ import httpResponse from '../util/httpResponse'
 import responseMessage from '../constant/responseMessage'
 import httpError from '../util/httpError'
 import quicker from '../util/quicker'
-import { ILoginUserRequestBody, IRefreshToken, IRegisterUserRequestBody, IUser } from '../types/userTypes'
+import { IDecryptedJwt, ILoginUserRequestBody, IRefreshToken, IRegisterUserRequestBody, IUser } from '../types/userTypes'
 import { ValidateLoginBody, ValidateRegisterBody, validateJoiSchema } from '../service/validationService'
 import databaseService from '../service/databaseService'
 import { EUserRole } from '../constant/userConstant'
@@ -239,7 +239,7 @@ export default {
             await databaseService.createRefreshToken(refreshTokenPayload)
             // * Cookie send
             const DOMAIN = quicker.getDomainFromUrl(config.SERVER_URL as string)
-            
+
             res.cookie('accessToken', accesstoken, {
                 path: '/api/v1',
                 domain: DOMAIN,
@@ -285,7 +285,7 @@ export default {
             }
             const DOMAIN = quicker.getDomainFromUrl(config.SERVER_URL as string)
             //cookies clear
-            res.clearCookie('accessToken',{
+            res.clearCookie('accessToken', {
                 path: '/api/v1',
                 domain: DOMAIN,
                 sameSite: 'strict',
@@ -293,7 +293,7 @@ export default {
                 httpOnly: true,
                 secure: !(config.ENV === EApplicationEnvironment.DEVELOPMENT)
             })
-            res.clearCookie('refreshToken',{
+            res.clearCookie('refreshToken', {
                 path: '/api/v1',
                 domain: DOMAIN,
                 sameSite: 'strict',
@@ -303,6 +303,53 @@ export default {
             })
 
             httpResponse(req, res, 200, responseMessage.SUCCESS)
+        } catch (err) {
+            httpError(next, err, req, 500)
+        }
+    },
+    refreshToken: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { cookies } = req
+            const { refreshToken, accessToken } = cookies as {
+                refreshToken: string | undefined
+                accessToken: string | undefined
+            }
+            if (accessToken) {
+                return httpResponse(req, res, 200, responseMessage.SUCCESS, {
+                    accessToken
+                })
+            }
+            if (refreshToken) {
+                // Db call to delete refresh token
+                const rft = await databaseService.findRefreshToken(refreshToken)
+                if (rft) {
+                    // genrate new token
+                    const DOMAIN = quicker.getDomainFromUrl(config.SERVER_URL as string)
+                    const { userId } = quicker.verifyToken(refreshToken, config.REFRESH_TOKEN.SECRET as string) as IDecryptedJwt
+                    // * Access token & refress token
+                    const accessToken = quicker.generateToken(
+                        {
+                             
+                            userId: userId
+                        },
+                        config.ACCESS_TOKEN.SECRET as string,
+                        config.ACCESS_TOKEN.EXPIRY
+                    )
+                    res.cookie('accessToken', accessToken, {
+                        path: '/api/v1',
+                        domain: DOMAIN,
+                        sameSite: 'strict',
+                        maxAge: 1000 * config.ACCESS_TOKEN.EXPIRY,
+                        httpOnly: true,
+                        secure: !(config.ENV === EApplicationEnvironment.DEVELOPMENT)
+                    })
+                    return httpResponse(req, res, 200, responseMessage.SUCCESS, {
+                        accessToken
+                    })
+                }
+            }
+
+            httpError(next, new Error(responseMessage.UNAUTHORIZED), req, 401)
         } catch (err) {
             httpError(next, err, req, 500)
         }
