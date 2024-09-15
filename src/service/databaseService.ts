@@ -27,11 +27,15 @@ export default {
             'accountConfirmation.code': code
         })
     },
-    createRefreshToken: (payload: IRefreshToken) => {
-        return refreshTokenModel.create(payload)
-    },
     findUserById: (id: string,) => {
         return userModel.findById(id)
     },
+    createRefreshToken: (payload: IRefreshToken) => {
+        return refreshTokenModel.create(payload)
+    },
+    
+    deleteRefreshToken: (token: string) => {
+        return refreshTokenModel.deleteOne({token:token})
+    }
 
 }

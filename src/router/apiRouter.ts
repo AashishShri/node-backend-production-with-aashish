@@ -22,4 +22,7 @@ router.route('/login').post(apiController.login)
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.route('/self-identification').get(authentication, apiController.selfIdentification)
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+router.route('/logout').put(authentication, apiController.logout)
+
 export default router
