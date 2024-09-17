@@ -12,4 +12,6 @@ export default {
     INVALID_EMAIL_OR_PASSWORD: `Invalid email address or password`,
     UNAUTHORIZED: `You are not authorized to perform this action`,
     ACCOUNT_CONFIRMATION_REQUIRED: `Account confirmed required`,
+    EXPIRED_URL: `Your password reset url is expired`,
+    INVALIED_REQUEST: `Invalid request`,
 }

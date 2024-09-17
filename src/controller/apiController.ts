@@ -3,8 +3,22 @@ import httpResponse from '../util/httpResponse'
 import responseMessage from '../constant/responseMessage'
 import httpError from '../util/httpError'
 import quicker from '../util/quicker'
-import { IDecryptedJwt, IForgotPasswordRequestBody, ILoginUserRequestBody, IRefreshToken, IRegisterUserRequestBody, IUser } from '../types/userTypes'
-import { ValidateForgotPasswordBody, ValidateLoginBody, ValidateRegisterBody, validateJoiSchema } from '../service/validationService'
+import {
+    IDecryptedJwt,
+    IForgotPasswordRequestBody,
+    ILoginUserRequestBody,
+    IRefreshToken,
+    IRegisterUserRequestBody,
+    IResetPasswordRequestBody,
+    IUser
+} from '../types/userTypes'
+import {
+    ValidateForgotPasswordBody,
+    ValidateLoginBody,
+    ValidateRegisterBody,
+    ValidateResetPasswordBody,
+    validateJoiSchema
+} from '../service/validationService'
 import databaseService from '../service/databaseService'
 import { EUserRole } from '../constant/userConstant'
 import config from '../config/config'
@@ -38,6 +52,13 @@ interface ISelfIdentificationRequest extends Request {
 
 interface IForgotPasswordRequest extends Request {
     body: IForgotPasswordRequestBody
+}
+
+interface IResetPasswordRequest extends Request {
+    body: IResetPasswordRequestBody
+    params: {
+        token: string
+    }
 }
 export default {
     self: (req: Request, res: Response, next: NextFunction) => {
@@ -333,7 +354,6 @@ export default {
                     // * Access token & refress token
                     const accessToken = quicker.generateToken(
                         {
-                             
                             userId: userId
                         },
                         config.ACCESS_TOKEN.SECRET as string,
@@ -364,15 +384,15 @@ export default {
             // TODO
             // Body parseer
             const { body } = req as IForgotPasswordRequest
-             // Validate body
+            // Validate body
             const { error, value } = validateJoiSchema<IForgotPasswordRequestBody>(ValidateForgotPasswordBody, body)
             if (error) {
                 return httpError(next, error, req, 422)
             }
-           
+
             // Find user by email address
-           
-            const { emailAddress  } = value
+
+            const { emailAddress } = value
             const user = await databaseService.findUserByEmailAddress(emailAddress)
             if (!user) {
                 return httpError(next, new Error(responseMessage.NOT_FOUND('user')), req, 404)
@@ -381,7 +401,7 @@ export default {
             if (!user.accountConfirmation.status) {
                 return httpError(next, new Error(responseMessage.ACCOUNT_CONFIRMATION_REQUIRED), req, 400)
             }
-            
+
             // password reset token & expiry
             const token = quicker.generateRandomId()
             const expiry = quicker.generateResetPasswordExpiry(15)
@@ -407,5 +427,63 @@ export default {
             httpError(next, err, req, 500)
         }
     },
+    resetPassword: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            // Todo
+            // Body parser and validation
+            const { body, params } = req as IResetPasswordRequest
+            const { token } = params
+            const { error, value } = validateJoiSchema<IResetPasswordRequestBody>(ValidateResetPasswordBody, body)
+            if (error) {
+                return httpError(next, error, req, 422)
+            }
+
+            // fetch user by token
+
+            const { newPassword } = value
+            const user = await databaseService.findUserByResetToken(token)
+            if (!user) {
+                return httpError(next, new Error(responseMessage.NOT_FOUND('user')), req, 404)
+            }
+
+            // Check if user account confirm
+            if (!user.accountConfirmation.status) {
+                return httpError(next, new Error(responseMessage.ACCOUNT_CONFIRMATION_REQUIRED), req, 400)
+            }
+            // check expiry of the url
+           const storedExpiry = user.passwordReset.expiry
+           const currentTimeStamp = dayjs().valueOf()
+           if (!storedExpiry) {
+            return httpError(next, new Error(responseMessage.INVALIED_REQUEST), req, 400)
+           }
+           if (currentTimeStamp > storedExpiry) {
+            return httpError(next, new Error(responseMessage.EXPIRED_URL), req, 400)
+           }
+            // has new password
+            const hashedPassword = await quicker.hashPassword(newPassword)
+            // user update
+            user.password = hashedPassword
+
+            user.passwordReset.expiry = null
+            user.passwordReset.token = null
+            user.passwordReset.lastResetAt = dayjs().utc().toDate()
+            await user.save()
+            // email send
+            
+            const to = [user.emailAddress]
+            const subject = 'Reset Account Password Success'
+            const text = `Hey ${user.name}, Your account password has been reset successfully`
+
+            emailService.sendEmail(to, subject, text).catch((err) => {
+                logger.error(`EMAIL_SERVICE`, {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    meta: err
+                })
+            })
+            httpResponse(req, res, 200, responseMessage.SUCCESS)
+        } catch (err) {
+            httpError(next, err, req, 500)
+        }
+    }
 }
 

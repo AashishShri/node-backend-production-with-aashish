@@ -50,3 +50,7 @@ export interface IDecryptedJwt extends JwtPayload {
 export interface IForgotPasswordRequestBody {
     emailAddress: string
 }
+
+export interface IResetPasswordRequestBody {
+    newPassword: string
+}

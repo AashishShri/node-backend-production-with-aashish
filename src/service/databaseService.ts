@@ -40,6 +40,11 @@ export default {
 
     findRefreshToken: (token: string) => {
         return refreshTokenModel.findOne({token:token})
-    }
+    },
+    findUserByResetToken: (token: string) => {
+        return userModel.findOne({
+            'passwordReset.token': token
+        })
+    },
 
 }
