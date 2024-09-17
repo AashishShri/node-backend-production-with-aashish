@@ -28,4 +28,7 @@ router.route('/logout').put(authentication, apiController.logout)
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.route('/refresh-token').post(apiController.refreshToken)
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+router.route('/forgot-password').put(apiController.forgotPassword)
+
 export default router

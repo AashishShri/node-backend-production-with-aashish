@@ -11,4 +11,5 @@ export default {
     ACCOUNT_ALREADY_CONFIRMED: `Account already confirmed`,
     INVALID_EMAIL_OR_PASSWORD: `Invalid email address or password`,
     UNAUTHORIZED: `You are not authorized to perform this action`,
+    ACCOUNT_CONFIRMATION_REQUIRED: `Account confirmed required`,
 }
