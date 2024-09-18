@@ -4,15 +4,18 @@ import responseMessage from '../constant/responseMessage'
 import httpError from '../util/httpError'
 import quicker from '../util/quicker'
 import {
+    IChangePasswordRequestBody,
     IDecryptedJwt,
     IForgotPasswordRequestBody,
     ILoginUserRequestBody,
     IRefreshToken,
     IRegisterUserRequestBody,
     IResetPasswordRequestBody,
-    IUser
+    IUser,
+    IUserWithId
 } from '../types/userTypes'
 import {
+    ValidateChangePasswordBody,
     ValidateForgotPasswordBody,
     ValidateLoginBody,
     ValidateRegisterBody,
@@ -59,6 +62,11 @@ interface IResetPasswordRequest extends Request {
     params: {
         token: string
     }
+}
+
+interface IChangePasswordRequest extends Request {
+    authenticatedUser: IUserWithId
+    body: IChangePasswordRequestBody
 }
 export default {
     self: (req: Request, res: Response, next: NextFunction) => {
@@ -451,14 +459,14 @@ export default {
                 return httpError(next, new Error(responseMessage.ACCOUNT_CONFIRMATION_REQUIRED), req, 400)
             }
             // check expiry of the url
-           const storedExpiry = user.passwordReset.expiry
-           const currentTimeStamp = dayjs().valueOf()
-           if (!storedExpiry) {
-            return httpError(next, new Error(responseMessage.INVALIED_REQUEST), req, 400)
-           }
-           if (currentTimeStamp > storedExpiry) {
-            return httpError(next, new Error(responseMessage.EXPIRED_URL), req, 400)
-           }
+            const storedExpiry = user.passwordReset.expiry
+            const currentTimeStamp = dayjs().valueOf()
+            if (!storedExpiry) {
+                return httpError(next, new Error(responseMessage.INVALIED_REQUEST), req, 400)
+            }
+            if (currentTimeStamp > storedExpiry) {
+                return httpError(next, new Error(responseMessage.EXPIRED_URL), req, 400)
+            }
             // has new password
             const hashedPassword = await quicker.hashPassword(newPassword)
             // user update
@@ -469,7 +477,7 @@ export default {
             user.passwordReset.lastResetAt = dayjs().utc().toDate()
             await user.save()
             // email send
-            
+
             const to = [user.emailAddress]
             const subject = 'Reset Account Password Success'
             const text = `Hey ${user.name}, Your account password has been reset successfully`
@@ -480,6 +488,56 @@ export default {
                     meta: err
                 })
             })
+            httpResponse(req, res, 200, responseMessage.SUCCESS)
+        } catch (err) {
+            httpError(next, err, req, 500)
+        }
+    },
+    changePassword: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            // Todo
+            // body parser and validation
+            const { body, authenticatedUser } = req as IChangePasswordRequest
+
+            const { error, value } = validateJoiSchema<IChangePasswordRequestBody>(ValidateChangePasswordBody, body)
+            if (error) {
+                return httpError(next, error, req, 422)
+            }
+
+            // fetch user by id
+            const user = await databaseService.findUserById(authenticatedUser._id, '+password')
+            if (!user) {
+                return httpError(next, new Error(responseMessage.NOT_FOUND('user')), req, 404)
+            }
+
+            const { oldPassword, newPassword } = value
+
+            // check old password matching with new
+            const isPasswordMatching = await quicker.comparePassword(oldPassword, user.password)
+            if (!isPasswordMatching) {
+                return httpError(next, new Error(responseMessage.INVALIED_OLD_PASSWORD), req, 400)
+            }
+            if (oldPassword == newPassword) {
+                return httpError(next, new Error(responseMessage.PASSWORD_MATCHING_WITH_OLD_PASSWORD), req, 400)
+            }
+            // password hash for new password
+            const hashedPassword = await quicker.hashPassword(newPassword)
+             // user update
+            user.password = hashedPassword
+            await user.save()
+           
+          // email send
+
+          const to = [user.emailAddress]
+          const subject = 'Password Successfully changed'
+          const text = `Hey ${user.name}, Your account password has been changed successfully`
+
+          emailService.sendEmail(to, subject, text).catch((err) => {
+              logger.error(`EMAIL_SERVICE`, {
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                  meta: err
+              })
+          })
             httpResponse(req, res, 200, responseMessage.SUCCESS)
         } catch (err) {
             httpError(next, err, req, 500)

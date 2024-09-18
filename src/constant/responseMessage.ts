@@ -14,4 +14,6 @@ export default {
     ACCOUNT_CONFIRMATION_REQUIRED: `Account confirmed required`,
     EXPIRED_URL: `Your password reset url is expired`,
     INVALIED_REQUEST: `Invalid request`,
+    INVALIED_OLD_PASSWORD: `Invalid old password`,
+    PASSWORD_MATCHING_WITH_OLD_PASSWORD: `Old and new password should not be same`,
 }

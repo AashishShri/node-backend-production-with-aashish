@@ -34,4 +34,7 @@ router.route('/forgot-password').put(apiController.forgotPassword)
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.route('/reset-password/:token').put(apiController.resetPassword)
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+router.route('/change-password').put(authentication, apiController.changePassword)
+
 export default router

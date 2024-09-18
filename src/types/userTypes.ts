@@ -26,6 +26,10 @@ export interface IUser {
     lastLoginAt: Date | null
     consent: boolean
 }
+
+export interface IUserWithId extends IUser {
+_id :string
+} 
 export interface IRefreshToken {
     token: string
 }
@@ -53,4 +57,10 @@ export interface IForgotPasswordRequestBody {
 
 export interface IResetPasswordRequestBody {
     newPassword: string
+}
+
+export interface IChangePasswordRequestBody {
+    oldPassword: string,
+    newPassword: string,
+    confirmPassword: string
 }

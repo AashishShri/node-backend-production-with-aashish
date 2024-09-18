@@ -27,8 +27,8 @@ export default {
             'accountConfirmation.code': code
         })
     },
-    findUserById: (id: string,) => {
-        return userModel.findById(id)
+    findUserById: (id: string, select :string ='') => {
+        return userModel.findById(id).select(select)
     },
     createRefreshToken: (payload: IRefreshToken) => {
         return refreshTokenModel.create(payload)
