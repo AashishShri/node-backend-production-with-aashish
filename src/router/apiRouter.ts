@@ -11,13 +11,13 @@ router.route('/health').get(apiController.health)
 
 //Router for authentications system
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-router.route('/register').post(apiController.register)
+router.route('/register').post(rateLimit, apiController.register)
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-router.route('/confirmation/:token').put(apiController.confirmation)
+router.route('/confirmation/:token').put(rateLimit, apiController.confirmation)
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-router.route('/login').post(apiController.login)
+router.route('/login').post(rateLimit, apiController.login)
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.route('/self-identification').get(authentication, apiController.selfIdentification)
@@ -26,13 +26,13 @@ router.route('/self-identification').get(authentication, apiController.selfIdent
 router.route('/logout').put(authentication, apiController.logout)
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-router.route('/refresh-token').post(apiController.refreshToken)
+router.route('/refresh-token').post(rateLimit, apiController.refreshToken)
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-router.route('/forgot-password').put(apiController.forgotPassword)
+router.route('/forgot-password').put(rateLimit, apiController.forgotPassword)
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-router.route('/reset-password/:token').put(apiController.resetPassword)
+router.route('/reset-password/:token').put(rateLimit, apiController.resetPassword)
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.route('/change-password').put(authentication, apiController.changePassword)

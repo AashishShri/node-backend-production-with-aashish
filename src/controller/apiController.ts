@@ -330,7 +330,7 @@ export default {
                 path: '/api/v1',
                 domain: DOMAIN,
                 sameSite: 'strict',
-                maxAge: 1000 * config.ACCESS_TOKEN.EXPIRY,
+                maxAge: 1000 * config.REFRESH_TOKEN.EXPIRY,
                 httpOnly: true,
                 secure: !(config.ENV === EApplicationEnvironment.DEVELOPMENT)
             })
@@ -358,26 +358,35 @@ export default {
                 if (rft) {
                     // genrate new token
                     const DOMAIN = quicker.getDomainFromUrl(config.SERVER_URL as string)
-                    const { userId } = quicker.verifyToken(refreshToken, config.REFRESH_TOKEN.SECRET as string) as IDecryptedJwt
-                    // * Access token & refress token
-                    const accessToken = quicker.generateToken(
-                        {
-                            userId: userId
-                        },
-                        config.ACCESS_TOKEN.SECRET as string,
-                        config.ACCESS_TOKEN.EXPIRY
-                    )
-                    res.cookie('accessToken', accessToken, {
-                        path: '/api/v1',
-                        domain: DOMAIN,
-                        sameSite: 'strict',
-                        maxAge: 1000 * config.ACCESS_TOKEN.EXPIRY,
-                        httpOnly: true,
-                        secure: !(config.ENV === EApplicationEnvironment.DEVELOPMENT)
-                    })
-                    return httpResponse(req, res, 200, responseMessage.SUCCESS, {
-                        accessToken
-                    })
+                    let userId: null | string = null
+                    try {
+                        const decryptedJwt = quicker.verifyToken(refreshToken, config.REFRESH_TOKEN.SECRET as string) as IDecryptedJwt
+                        userId = decryptedJwt.userId
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    } catch (err) {
+                        userId = null
+                    }
+                    if (userId) {
+                        // * Access token & refress token
+                        const accessToken = quicker.generateToken(
+                            {
+                                userId: userId
+                            },
+                            config.ACCESS_TOKEN.SECRET as string,
+                            config.ACCESS_TOKEN.EXPIRY
+                        )
+                        res.cookie('accessToken', accessToken, {
+                            path: '/api/v1',
+                            domain: DOMAIN,
+                            sameSite: 'strict',
+                            maxAge: 1000 * config.ACCESS_TOKEN.EXPIRY,
+                            httpOnly: true,
+                            secure: !(config.ENV === EApplicationEnvironment.DEVELOPMENT)
+                        })
+                        return httpResponse(req, res, 200, responseMessage.SUCCESS, {
+                            accessToken
+                        })
+                    }
                 }
             }
 
@@ -420,7 +429,7 @@ export default {
             // email send
             const resetUrl = `${config.FRONTEND_URL}/reset-password/${token}`
             const to = [emailAddress]
-            const subject = 'Reset Your Account'
+            const subject = 'Account Paasword Reset Requested'
             const text = `Hey ${user.name}, Please reset your account password by clicking on the link below\n\n Link will expire within 15 minutes \n\n${resetUrl}`
 
             emailService.sendEmail(to, subject, text).catch((err) => {
@@ -479,7 +488,7 @@ export default {
             // email send
 
             const to = [user.emailAddress]
-            const subject = 'Reset Account Password Success'
+            const subject = 'Account Password Reset'
             const text = `Hey ${user.name}, Your account password has been reset successfully`
 
             emailService.sendEmail(to, subject, text).catch((err) => {
@@ -522,22 +531,22 @@ export default {
             }
             // password hash for new password
             const hashedPassword = await quicker.hashPassword(newPassword)
-             // user update
+            // user update
             user.password = hashedPassword
             await user.save()
-           
-          // email send
 
-          const to = [user.emailAddress]
-          const subject = 'Password Successfully changed'
-          const text = `Hey ${user.name}, Your account password has been changed successfully`
+            // email send
 
-          emailService.sendEmail(to, subject, text).catch((err) => {
-              logger.error(`EMAIL_SERVICE`, {
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                  meta: err
-              })
-          })
+            const to = [user.emailAddress]
+            const subject = 'Password Successfully changed'
+            const text = `Hey ${user.name}, Your account password has been changed successfully`
+
+            emailService.sendEmail(to, subject, text).catch((err) => {
+                logger.error(`EMAIL_SERVICE`, {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    meta: err
+                })
+            })
             httpResponse(req, res, 200, responseMessage.SUCCESS)
         } catch (err) {
             httpError(next, err, req, 500)
